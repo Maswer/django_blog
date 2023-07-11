@@ -1,0 +1,20 @@
+{% extends "blog/base.html" %}   <!-- наследование от базы, это БАЗА! -->
+
+{% block title %}Мой блох{% endblock %}
+
+{% block content %}
+    <h1>Мой блоХ</h1>
+    {% for post in posts %}
+        <h2>
+            <a href="{{ post.get_absolute_url }}">
+                {{ post.title }}
+            </a>
+        </h2>
+        <p class="date">
+            Опубликован {{ post.publish }} от {{ post.author }}
+        </p>
+        {{ post.body|truncatewords:20|linebreaks }}  <!-- truncatewords это количество слов в теле, что бы не отображать весь текст поста.
+        linebreaks это типа перенос строки, но со своими приколами.-->
+    {% endfor %}
+    {% include "pagination.html" with page=page_obj %}
+{% endblock %}
