@@ -3,7 +3,21 @@ from .models import Post
 from django.views.generic import ListView
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger  # вроде как список страниц, а EmptyPage это \
 # обработка ошибки когда вызываешь не сущ. страницу списка, PageNotAnInteger обработка ошибки не правильного url поста
+from .forms import EmailPostForm
 
+def post_share(request, post_id):
+    # Извлечь пост по id
+    post = get_object_or_404(Post, id=post_id, status=Post.Status.PUBLISHED)
+    if request.method == 'POST':
+        # Форма была передана на обработку
+        form = EmailPostForm(request.POST)
+        if form.is_valid():
+            cd = form.cleaned_data
+            #... отправить электронное письмо
+    else:
+        form = EmailPostForm()
+    return render(request, 'blog/post/share.html', {'post': post,
+                                                    'form': form})
 
 def post_detail(request, year, month, day, post):  # Это представление детальной информации о посте.
     post = get_object_or_404(Post,  # Ошибка 404
