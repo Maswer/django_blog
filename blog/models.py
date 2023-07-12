@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.urls import reverse
+from taggit.managers import TaggableManager
 
 class PublishedManager(models.Manager):  # менеджера возвращает набор запросов QuerySet, который будет исполнен
     def get_queryset(self):
@@ -29,6 +30,11 @@ class Post(models.Model):
                               verbose_name='Статус')  # Статус поста по дефолту "Черновик".
     object = models.Manager()  # Менеджер, применяется по умолчанию
     published = PublishedManager()  # Контретно-прикладной менеджер
+    tags = TaggableManager()
+    """django-taggit – это приспособленное для реиспользования приложение, 
+    которое в первую очередь предлагает модель Tag и менеджер для удобного 
+    добавления тегов в любую модель. Исходный код приложения доступен для 
+    просмотра на странице"""
 
     class Meta:
         ordering = ['-publish']  # Обратный порядок постов
