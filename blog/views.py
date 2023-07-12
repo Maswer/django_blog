@@ -4,20 +4,30 @@ from django.views.generic import ListView
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger  # вроде как список страниц, а EmptyPage это \
 # обработка ошибки когда вызываешь не сущ. страницу списка, PageNotAnInteger обработка ошибки не правильного url поста
 from .forms import EmailPostForm
+from django.core.mail import send_mail
 
 def post_share(request, post_id):
     # Извлечь пост по id
-    post = get_object_or_404(Post, id=post_id, status=Post.Status.PUBLISHED)
+    post = get_object_or_404(Post, id=post_id, status=Post.Status.PUBLISHED)  # извлечь опубликованный пост по его id
+    sent = False
+
     if request.method == 'POST':
         # Форма была передана на обработку
         form = EmailPostForm(request.POST)
         if form.is_valid():
             cd = form.cleaned_data
+            post_url = request.build_absolute_url(post.get_absolute_url())
+            subject = f"{cd['name']} рекомендует вам прочитать {post.title}"
+            message = f"Прочитайте {post.title} в {post_url}\n\n" \
+            f"от {cd['name']} комментарий: {cd['comments']}"
+            send_mail(subject, message, "bolket45@yandex.ru", [cd['to']])
+            sent = True
             #... отправить электронное письмо
     else:
         form = EmailPostForm()
     return render(request, 'blog/post/share.html', {'post': post,
-                                                    'form': form})
+                                                    'form': form,
+                                                    'sent': sent})
 
 def post_detail(request, year, month, day, post):  # Это представление детальной информации о посте.
     post = get_object_or_404(Post,  # Ошибка 404
@@ -29,25 +39,6 @@ def post_detail(request, year, month, day, post):  # Это представле
     return render(request,
                 'blog/post/detail.html',
                 {'post': post})
-
-def post_list(request):
-    post_list = Post.published.all()
-    # Постраничная разбивка с 5 постами на странице
-    paginator = Paginator(post_list, 5)
-    page_number = request.GET.get('page', 1)
-    try:
-        posts = paginator.page(page_number)
-    except PageNotAnInteger:
-        # Если page_number не целое число, то
-        # выдать первую страницу
-        posts = paginator.page(1)
-    except EmptyPage:
-        # Если page_number находится вне диапазона, то
-        # выдать последнюю страницу
-        posts = paginator.page(paginator.num_pages)
-    return render(request,
-                  'blog/post/list.html',
-                  {'posts': posts})
 
 class PostListView(ListView):
     """Альтернативное предстваление списка постов"""
