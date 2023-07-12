@@ -1,10 +1,31 @@
 from django.shortcuts import render, get_object_or_404
-from .models import Post
+from .models import Post, Comment
 from django.views.generic import ListView
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger  # вроде как список страниц, а EmptyPage это \
 # обработка ошибки когда вызываешь не сущ. страницу списка, PageNotAnInteger обработка ошибки не правильного url поста
-from .forms import EmailPostForm
+from .forms import EmailPostForm, CommentForm
 from django.core.mail import send_mail
+from django.views.decorators.http import require_POST
+
+
+@require_POST
+def post_comment(request, post_id):
+    post = get_object_or_404(Post, id=post_id, status=Post.Status.PUBLISHED)
+    comment = None
+    # Коммент был отправлен
+    form = CommentForm(data=request.POST)
+    if form.is_valid():
+        # Создать объект класса Comment, не сохраняя его в базе данных
+        comment = form.save(commit=False)
+        # Назначить пост комментарию
+        comment.post = post
+        # Сохранить комментарий в базе данных
+        comment.save()
+    return render(request, 'blog/post/comment.html',
+                  {'post': post,
+                   'form': form,
+                   'comment': comment,})
+
 
 def post_share(request, post_id):
     # Извлечь пост по id
@@ -36,9 +57,16 @@ def post_detail(request, year, month, day, post):  # Это представле
                              publish__year=year,
                              publish__month=month,
                              publish__day=day)
+    # Список активных комментариев к этому посту
+    comments = post.comments.filter(active=True)
+    # Форма для комментирования пользователями
+    form = CommentForm()
+
     return render(request,
                 'blog/post/detail.html',
-                {'post': post})
+                {'post': post,
+                 'comments': comments,
+                 'form': form})
 
 class PostListView(ListView):
     """Альтернативное предстваление списка постов"""

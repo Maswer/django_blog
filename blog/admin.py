@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Post
+from .models import Post, Comment
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
@@ -10,3 +10,9 @@ class PostAdmin(admin.ModelAdmin):
     raw_id_fields = ['author']  # отображается поисковым виджетом, который будет более приемлемым, чем выбор из выпадающего списка, когда у вас тысячи пользователей
     date_hierarchy = 'publish'  # навигационные ссылки для навигации по иерархии дат.
     ordering = ['status', 'publish']  # По умолчанию посты упорядочены по столбцам STATUS и PUBLISH.
+
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ['name', 'email', 'post', 'created', 'active']
+    list_filter = ['active', 'created', 'updated']
+    search_fields = ['name', 'email', 'body']

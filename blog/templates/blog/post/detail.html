@@ -11,4 +11,16 @@
             Поделиться этой записью
         </a>
      </p>
+    {% with comments.count as total_comments %}
+         <h2>{{ total_comments }} comment{{ total_comments|pluralize }}</h2>
+    {% endwith %}
+    {% for comment in comments %}
+     <div class="comment">
+     <p class="info">
+     Коммент {{ forloop.counter }} от {{ comment.name }} {{ comment.created }}
+     </p>{{ comment.body|linebreaks }}</div>
+    {% empty %}
+    <p>Нет комментариев.</p>
+    {% endfor %}
+{% include "blog/post/includes/comment_form.html" %}
 {% endblock %}

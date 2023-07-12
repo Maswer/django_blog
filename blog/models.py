@@ -45,3 +45,23 @@ class Post(models.Model):
                              self.publish.month,
                              self.publish.day,
                              self.slug])
+
+
+class Comment(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE,  # Связать каждый коммент с постом
+                             related_name='comments')
+    # Атрибут related_name позволяет назначать имя атрибуту, который используется для связи от ассоциированного объекта назад к нему
+    name = models.CharField(max_length=80)
+    email = models.EmailField()
+    body = models.TextField()
+    created = models.DateTimeField(auto_now_add=True)  # создает метку при создании строки в базе
+    updated = models.DateTimeField(auto_now=True)  # обновляет метку каждый раз при изменении
+    active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['created']
+        indexes = [models.Index(fields=['created']),
+                   ]
+
+    def __str__(self):
+        return f'Комментарий от {self.name} на {self.post}'
