@@ -4,17 +4,28 @@
 
 {% block content %}
     <h1>Мой блоХ</h1>
+    {% if tag %}
+        <h2>Сообщения с тегами "{{ tag.name }}"</h2>
+    {% endif %}
     {% for post in posts %}
         <h2>
             <a href="{{ post.get_absolute_url }}">
                 {{ post.title }}
             </a>
         </h2>
+        <p class="tags">Теги:
+         {% for tag in post.tags.all %}
+             <a href="{% url "blog:post_list_by_tag" tag.slug %}">
+             {{ tag.name }}
+             </a>
+         {% if not forloop.last %}, {% endif %}
+         {% endfor %}
+        </p>
         <p class="date">
             Опубликован {{ post.publish }} от {{ post.author }}
         </p>
         {{ post.body|truncatewords:20|linebreaks }}  <!-- truncatewords это количество слов в теле, что бы не отображать весь текст поста.
         linebreaks это типа перенос строки, но со своими приколами.-->
     {% endfor %}
-    {% include "pagination.html" with page=page_obj %}
+    {% include "pagination.html" with page=posts %}
 {% endblock %}
