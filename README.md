@@ -1,2 +1,2 @@
 # django_blog
-Django_4_v_primerakh = 133;
+Django_4_v_primerakh = 148;
